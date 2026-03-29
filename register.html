@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Event Registration</title>
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(
+                rgba(0,0,0,0.6),
+                rgba(0,0,0,0.6)
+            ),
+            url('https://images.unsplash.com/photo-1521737604893-d14cc237f11d') no-repeat center/cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+        }
+
+        /* Form Card */
+        .form-container {
+            width: 100%;
+            max-width: 420px;
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            padding: 35px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 2rem;
+        }
+
+        label {
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+            display: block;
+            opacity: 0.9;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            margin-bottom: 18px;
+            outline: none;
+            font-size: 0.95rem;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        select {
+            background: rgba(255, 255, 255, 0.85);
+        }
+
+        /* Button */
+        input[type="submit"] {
+            background: #00c6ff;
+            color: #000;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        input[type="submit"]:hover {
+            background: #fff;
+        }
+
+        /* Responsive */
+        @media (max-width: 500px) {
+            .form-container {
+                margin: 20px;
+                padding: 25px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="form-container">
+        <h1>Register for an Event</h1>
+
+        <form id="event-register-form">
+            <label>Name</label>
+            <input type="text" placeholder="Enter your name" required>
+
+            <label>Email</label>
+            <input type="email" placeholder="Enter your email" required>
+
+            <label>Department</label>
+            <input type="text" placeholder="Enter your department" required>
+
+            <label>Select Event</label>
+            <select id="event-select" required>
+                <option value="">-- Choose an Event --</option>
+                <!-- Events will be loaded dynamically -->
+            </select>
+
+            <input type="submit" value="Register">
+        </form>
+    </div>
+
+    <script>
+        // Load events into select dropdown
+        function loadEvents() {
+            const select = document.getElementById('event-select');
+            
+            // Default events
+            const defaultEvents = [
+                'Hackathon', 'Dance Battle', 'Cricket Tournament', 
+                'Basketball Tournament', 'Christ Kengeri League', 
+                'Seminars/Talks', 'Streetplay', 'Flashmob'
+            ];
+            
+            // Try to fetch from backend
+            fetch('api/get_events.php')
+                .then(response => response.json())
+                .then(data => {
+                    let events = [];
+                    
+                    if (data.success && data.events && data.events.length > 0) {
+                        events = data.events.map(ev => ev.name);
+                    } else {
+                        // Fallback to localStorage
+                        const storedEvents = localStorage.getItem('events');
+                        if (storedEvents) {
+                            try {
+                                const parsed = JSON.parse(storedEvents);
+                                events = parsed.map(ev => ev.name);
+                            } catch (e) {
+                                events = defaultEvents;
+                            }
+                        } else {
+                            events = defaultEvents;
+                        }
+                    }
+                    
+                    // Add events to select
+                    events.forEach(eventName => {
+                        const option = document.createElement('option');
+                        option.value = eventName;
+                        option.textContent = eventName;
+                        select.appendChild(option);
+                    });
+                    
+                    // Pre-select the event if coming from the Events page
+                    const params = new URLSearchParams(window.location.search);
+                    const eventName = params.get('event');
+                    if (eventName) {
+                        select.value = eventName;
+                    }
+                })
+                .catch(error => {
+                    console.log('Backend not available, using default events');
+                    // Add default events
+                    defaultEvents.forEach(eventName => {
+                        const option = document.createElement('option');
+                        option.value = eventName;
+                        option.textContent = eventName;
+                        select.appendChild(option);
+                    });
+                    
+                    // Pre-select the event if coming from the Events page
+                    const params = new URLSearchParams(window.location.search);
+                    const eventName = params.get('event');
+                    if (eventName) {
+                        select.value = eventName;
+                    }
+                });
+        }
+        
+        // Load events on page load
+        loadEvents();
+        
+        // Pre-select the event if coming from the Events page (fallback)
+        (function () {
+            const params = new URLSearchParams(window.location.search);
+            const eventName = params.get('event');
+            if (eventName) {
+                setTimeout(() => {
+                    const select = document.getElementById('event-select');
+                    if (select && select.options.length > 0) {
+                        select.value = eventName;
+                    }
+                }, 500);
+            }
+
+            // Handle form submission
+            const form = document.getElementById('event-register-form');
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                
+                const name = form.querySelector('input[type="text"]').value;
+                const email = form.querySelector('input[type="email"]').value;
+                const department = form.querySelectorAll('input[type="text"]')[1].value;
+                const eventName = document.getElementById('event-select').value;
+
+                // Get event ID from backend or use event name
+                const userId = localStorage.getItem('currentUserId');
+                
+                // Try to register via backend
+                if (userId) {
+                    // First, get event ID from backend
+                    // 1. Update the event list loader
+fetch('/api/events') // Changed from 'api/get_events.php'
+
+// 2. Update the registration submission
+fetch('/api/events/register', { // Changed from 'api/register_event.php'
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+        event_id: event.id,
+        user_id: parseInt(userId)
+    })
+})
+                } else {
+                    // No user ID, just show success message
+                    alert('You have been registered for the event.');
+                    window.location.href = 'student-dashboard.html';
+                }
+            });
+        })();
+    </script>
+
+</body>
+</html>
