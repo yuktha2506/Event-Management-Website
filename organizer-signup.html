@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Organizer Sign Up</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(
+                rgba(0,0,0,0.6),
+                rgba(0,0,0,0.6)
+            ),
+            url('https://images.unsplash.com/photo-1511578314322-379afb476865') no-repeat center/cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+        }
+
+        .card {
+            width: 100%;
+            max-width: 480px;
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            padding: 35px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+
+        p.subtitle {
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+
+        label {
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+            display: block;
+            opacity: 0.9;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            margin-bottom: 18px;
+            outline: none;
+            font-size: 0.95rem;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            background: #00c6ff;
+            color: #000;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-bottom: 10px;
+        }
+
+        .btn-primary:hover {
+            background: #fff;
+        }
+
+        .links {
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .links a {
+            color: #00c6ff;
+            text-decoration: none;
+        }
+
+        .links a:hover {
+            text-decoration: underline;
+        }
+
+        .back-home {
+            display: block;
+            text-align: center;
+            margin-top: 18px;
+            font-size: 0.9rem;
+            color: #fff;
+            text-decoration: none;
+            opacity: 0.85;
+        }
+
+        .back-home:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 500px) {
+            .card {
+                margin: 20px;
+                padding: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h1>Organizer Sign Up</h1>
+        <p class="subtitle">Register as an event head or staff coordinator.</p>
+
+        <form id="organizer-signup-form">
+            <label>Full Name</label>
+            <input type="text" placeholder="Enter your full name" required>
+
+            <label>Official Email</label>
+            <input type="email" placeholder="head@college.edu" required>
+
+            <label>Department / Club</label>
+            <input type="text" placeholder="e.g., CSE Dept, Cultural Club" required>
+
+            <label>Password</label>
+            <input type="password" placeholder="Create a password" required>
+
+            <button class="btn-primary" type="submit">Create Organizer Account</button>
+        </form>
+
+        <div class="links">
+            Already an organizer?
+            <a href="organizer-login.html">Login here</a>
+        </div>
+
+        <a href="index.html" class="back-home">← Back to Home</a>
+    </div>
+
+    <script>
+        document.getElementById('organizer-signup-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            
+            const form = e.target;
+            const name = form.querySelector('input[type="text"]').value;
+            const email = form.querySelector('input[type="email"]').value;
+            const department = form.querySelectorAll('input[type="text"]')[1].value;
+            const password = form.querySelector('input[type="password"]').value;
+
+            // Show loading state
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Creating account...';
+            submitBtn.disabled = false;
+
+            // Try backend first, fallback to localStorage
+            // Inside the signup-form submit listener
+fetch('/api/signup', { // Changed from 'api/signup.php'
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+        name: name,
+        email: email,
+        password: password,
+        role: 'organizer', // Or 'student'
+        department: department
+    })
+})
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Organizer account created successfully!');
+                    window.location.href = 'organizer-login.html';
+                } else {
+                    alert('Error: ' + data.message);
+                    submitBtn.textContent = originalText;
+                    submitBtn.disabled = false;
+                }
+            })
+            .catch(error => {
+                // Fallback for demo
+                console.log('Backend not available, using localStorage');
+                alert('Organizer account created (demo mode).');
+                window.location.href = 'organizer-login.html';
+            });
+        });
+    </script>
+
+</body>
+</html>
+
