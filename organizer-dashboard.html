@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Organizer Dashboard - Event Management</title>
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(
+                rgba(0,0,0,0.6),
+                rgba(0,0,0,0.6)
+            ),
+            url('https://images.unsplash.com/photo-1503676260728-1c00da094a0b')
+            no-repeat center center/cover;
+            color: #fff;
+        }
+
+        /* Navbar */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(6px);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            margin: 0 auto;
+        }
+
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 20px;
+            transition: 0.3s;
+        }
+
+        nav a:hover {
+            background: #00c6ff;
+            color: #000;
+        }
+
+        .logout-btn {
+            background: #ff4444;
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: #ff0000;
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 750px;
+            margin: 100px auto;
+            padding: 45px;
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 25px;
+            text-align: center;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 10px 35px rgba(0,0,0,0.35);
+        }
+
+        .container h1 {
+            font-size: 2.6rem;
+            margin-bottom: 15px;
+        }
+
+        .container p {
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        .container h2 {
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        /* Upload Button */
+        .upload-btn {
+            background: #00c6ff;
+            color: #000;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            margin: 20px 0;
+        }
+
+        .upload-btn:hover {
+            background: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 198, 255, 0.4);
+        }
+
+        /* Event Form Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(15px);
+            padding: 40px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content h2 {
+            margin-bottom: 25px;
+            font-size: 1.8rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+         .logout-btn {
+            background: #ff4444;
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: #ff0000;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            font-size: 0.95rem;
+            outline: none;
+            color: #000;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn-submit {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            background: #00c6ff;
+            color: #000;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-submit:hover {
+            background: #fff;
+        }
+
+        .btn-cancel {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-cancel:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Event List */
+        .event-list {
+            margin-top: 30px;
+            text-align: left;
+        }
+
+        .event-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            transition: 0.3s;
+        }
+
+        .event-item:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateX(5px);
+        }
+
+        .event-item h3 {
+            color: #00c6ff;
+            margin-bottom: 10px;
+        }
+
+        .event-item p {
+            margin: 5px 0;
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+
+        .event-category {
+            display: inline-block;
+            background: #00c6ff;
+            color: #000;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-top: 8px;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .container {
+                margin: 50px 20px;
+                padding: 30px;
+            }
+
+            .container h1 {
+                font-size: 2.1rem;
+            }
+
+            .modal-content {
+                padding: 25px;
+            }
+
+            nav {
+                padding: 15px 20px;
+            }
+
+            .nav-links {
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="organizer-dashboard.html">Dashboard</a>
+            <a href="contact.html">Contact</a>
+        </div>
+        <button class="logout-btn" id="logoutBtn" style="display:none;">Logout</button>
+    </nav>
+
+    <div class="container">
+        <h1>Organizer Dashboard</h1>
+        <p>Create and manage college events</p>
+
+        <button class="upload-btn" id="uploadBtn">Upload New Event</button>
+
+        <h2>Your Events</h2>
+        <div class="event-list" id="eventList">
+            <!-- Events will be displayed here -->
+            <p style="opacity: 0.7; text-align: center;">No events created yet. Click "Upload New Event" to get started!</p>
+        </div>
+    </div>
+
+    <!-- Event Upload Modal -->
+    <div class="modal" id="eventModal">
+        <div class="modal-content">
+            <h2>Create New Event</h2>
+            <form id="eventForm">
+                <div class="form-group">
+                    <label for="eventName">Event Name *</label>
+                    <input type="text" id="eventName" placeholder="e.g., Tech Fest 2026" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="eventCategory">Event Category *</label>
+                    <select id="eventCategory" required>
+                        <option value="">Select category</option>
+                        <option value="Technical">Technical</option>
+                        <option value="Cultural">Cultural</option>
+                        <option value="Sports">Sports</option>
+                        <option value="Workshop">Workshop</option>
+                        <option value="Seminar">Seminar</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="eventDate">Event Date *</label>
+                    <input type="date" id="eventDate" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="eventTime">Event Time *</label>
+                    <input type="time" id="eventTime" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="eventPlace">Event Place *</label>
+                    <input type="text" id="eventPlace" placeholder="e.g., Main Auditorium" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="eventDescription">Event Description</label>
+                    <textarea id="eventDescription" placeholder="Brief description of the event..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                        <input type="checkbox" id="requiresRegistration" checked style="width: auto; margin: 0;">
+                        <span>Requires Registration</span>
+                    </label>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" id="cancelBtn">Cancel</button>
+                    <button type="submit" class="btn-submit">Create Event</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Check if user is logged in as organizer
+        if (localStorage.getItem('currentUserRole') !== 'organizer') {
+            alert('Please login as organizer to access this page.');
+            window.location.href = 'organizer-login.html';
+        } else {
+            // Show logout button if organizer is logged in
+            document.getElementById('logoutBtn').style.display = 'inline-block';
+        }
+
+        // Get elements
+        const uploadBtn = document.getElementById('uploadBtn');
+        const eventModal = document.getElementById('eventModal');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const eventForm = document.getElementById('eventForm');
+        const eventList = document.getElementById('eventList');
+
+        // Load events from localStorage
+        let events = JSON.parse(localStorage.getItem('events')) || [];
+
+        // Show modal
+        uploadBtn.addEventListener('click', function() {
+            eventModal.classList.add('active');
+        });
+
+        // Hide modal
+        cancelBtn.addEventListener('click', function() {
+            eventModal.classList.remove('active');
+            eventForm.reset();
+        });
+
+        // Close modal when clicking outside
+        eventModal.addEventListener('click', function(e) {
+            if (e.target === eventModal) {
+                eventModal.classList.remove('active');
+                eventForm.reset();
+            }
+        });
+
+        // Handle form submission
+        eventForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Get form values
+            const newEvent = {
+                id: Date.now(),
+                name: document.getElementById('eventName').value,
+                category: document.getElementById('eventCategory').value,
+                date: document.getElementById('eventDate').value,
+                time: document.getElementById('eventTime').value,
+                place: document.getElementById('eventPlace').value,
+                description: document.getElementById('eventDescription').value,
+                requiresRegistration: document.getElementById('requiresRegistration').checked
+            };
+
+            // Add to events array
+            events.push(newEvent);
+
+            // Save to localStorage
+            localStorage.setItem('events', JSON.stringify(events));
+
+            // Also save to backend if available
+            const userId = localStorage.getItem('currentUserId');
+            const eventData = { ...newEvent };
+            if (userId) {
+                eventData.created_by = parseInt(userId);
+            }
+  
+fetch('/api/events/create', { 
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(eventData)
+})
+.then(response => response.json())
+.then(data => {
+    if (data.success) {
+        console.log('Event saved to Node.js backend');
+        // Node result uses result.insertId as shown in app.js
+        if (data.event_id) {
+            newEvent.id = data.event_id;
+            events[events.length - 1] = newEvent;
+            localStorage.setItem('events', JSON.stringify(events));
+        }
+    }
+});
+
+            // Close modal and reset form
+            eventModal.classList.remove('active');
+            eventForm.reset();
+
+            // Refresh event list
+            displayEvents();
+
+            // Show success message
+            alert('Event created successfully! It will now be visible to all students.');
+        });
+
+        // Display events
+        function displayEvents() {
+            if (events.length === 0) {
+                eventList.innerHTML = '<p style="opacity: 0.7; text-align: center;">No events created yet. Click "Upload New Event" to get started!</p>';
+                return;
+            }
+
+            eventList.innerHTML = events.map(event => `
+                <div class="event-item">
+                    <h3>${event.name}</h3>
+                    <p><strong>Date:</strong> ${formatDate(event.date)}</p>
+                    <p><strong>Time:</strong> ${formatTime(event.time)}</p>
+                    <p><strong>Place:</strong> ${event.place}</p>
+                    ${event.description ? `<p><strong>Description:</strong> ${event.description}</p>` : ''}
+                    <span class="event-category">${event.category}</span>
+                </div>
+            `).join('');
+        }
+
+        // Format date
+        function formatDate(dateString) {
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString('en-US', options);
+        }
+
+        // Format time
+        function formatTime(timeString) {
+            const [hours, minutes] = timeString.split(':');
+            const hour = parseInt(hours);
+            const ampm = hour >= 12 ? 'PM' : 'AM';
+            const displayHour = hour % 12 || 12;
+            return `${displayHour}:${minutes} ${ampm}`;
+        }
+
+        // Logout functionality
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            localStorage.removeItem('currentUserRole');
+            localStorage.removeItem('currentUserId');
+            localStorage.removeItem('currentUserName');
+            localStorage.removeItem('currentUserEmail');
+            window.location.href = 'organizer-login.html';
+        });
+
+        // Initial display
+        displayEvents();
+    </script>
+
+</body>
+</html>
